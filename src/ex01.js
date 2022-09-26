@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import * as CANNON from 'cannon-es';
 
 // ----- 주제: glb 파일 불러오기
 
@@ -37,6 +38,9 @@ export default function example() {
 	directionalLight.position.z = 2;
 	scene.add(directionalLight);
 
+	const cannonWorld = new CANNON.World();
+	cannonWorld.gravity.set(0, -10, 0);
+
 	// Controls
 	const controls = new OrbitControls(camera, renderer.domElement);
 
@@ -47,8 +51,9 @@ export default function example() {
 		'/models/jju.glb',
 		gltf => {
 			const jjuMesh = gltf.scene.children[0];
-			console.log(gltf);
 			scene.add(jjuMesh);
+
+			jjuMesh.position.y = 0.5;
 
 			mixer = new THREE.AnimationMixer(jjuMesh);
 			const actions = [];
@@ -59,6 +64,15 @@ export default function example() {
 			actions[0].play();
 		}
 	)
+	// Mesh
+	const floorMesh = new THREE.Mesh(
+		new THREE.PlaneGeometry(10, 10),
+		new THREE.MeshStandardMaterial({
+			color: 'slategray'
+		})
+	)
+	floorMesh.rotation.x = -Math.PI / 2;
+	scene.add(floorMesh);
 
 	// 그리기
 	const clock = new THREE.Clock();
