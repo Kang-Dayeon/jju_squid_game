@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 // ----- 주제: glb 파일 불러오기
 
@@ -40,12 +41,31 @@ export default function example() {
 	const controls = new OrbitControls(camera, renderer.domElement);
 
 	// gltf loader
+	const gltfloader = new GLTFLoader();
+	let mixer;
+	gltfloader.load(
+		'/models/jju.glb',
+		gltf => {
+			const jjuMesh = gltf.scene.children[0];
+			console.log(gltf);
+			scene.add(jjuMesh);
+
+			mixer = new THREE.AnimationMixer(jjuMesh);
+			const actions = [];
+			actions[0] = mixer.clipAction(gltf.animations[0]);
+			actions[1] = mixer.clipAction(gltf.animations[1]);
+			actions[0].repetitions = 1;
+			actions[0].clampWhenFinished = true;
+			actions[0].play();
+		}
+	)
 
 	// 그리기
 	const clock = new THREE.Clock();
 
 	function draw() {
 		const delta = clock.getDelta();
+		if (mixer) mixer.update(delta);
 
 		renderer.render(scene, camera);
 		renderer.setAnimationLoop(draw);
