@@ -10,10 +10,10 @@ const webpackMode = process.env.NODE_ENV || 'development';
 module.exports = {
 	mode: webpackMode,
 	entry: {
-		main: './src/main.js',
+		main: './src/js/main.js',
 	},
 	output: {
-		path: path.resolve('./dist'),
+		path: path.resolve('./dist/js'),
 		filename: '[name].min.js'
 	},
 	// es5로 빌드 해야 할 경우 주석 제거
@@ -69,7 +69,7 @@ module.exports = {
 				{ from: "./src/main.css", to: "./main.css" },
 				// { from: "./src/images", to: "./images" },
 				{ from: "./src/models", to: "./models" },
-				// { from: "./src/sounds", to: "./sounds" }
+				{ from: "./src/sounds", to: "./sounds" }
 			],
 		})
 	]
