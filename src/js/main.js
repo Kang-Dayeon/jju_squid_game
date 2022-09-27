@@ -1,16 +1,21 @@
 import { cm1, cm2 } from './common';
 import * as THREE from 'three';
+import * as CANNON from 'cannon-es';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { SpotLight } from 'three';
 import { Pillar } from './Pillar';
 import { Floor } from './Floor';
+import { Bar } from './Bar';
+import { SideLight } from './SideLight';
+import { Glass } from './Glass';
+import { Player } from './Player';
 
 // ----- 주제: The Bridge 게임 만들기
 
 // Renderer
-// const canvas = document.querySelector('#three-canvas');
+const canvas = document.querySelector('#three-canvas');
 const renderer = new THREE.WebGLRenderer({
-	canvas: cm1.canvas,
+	canvas,
 	antialias: true
 });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -39,6 +44,8 @@ cm1.scene.add(ambientLight);
 const spotLightDistance = 50;
 const spotLight1 = new THREE.SpotLight(cm2.lightColor, 1);
 spotLight1.castShadow = true;
+spotLight1.shadow.mapSize.width = 2048;
+spotLight1.shadow.mapSize.height = 2048;
 const spotLight2 = spotLight1.clone();
 const spotLight3 = spotLight1.clone();
 const spotLight4 = spotLight1.clone();
@@ -55,6 +62,7 @@ controls.enableDamping = true;
 
 // 물체만들기
 const glassUnitSize = 1.2;
+const numberOfGlass = 10; //유리판개수
 
 // 바닥
 const floor = new Floor({
@@ -75,11 +83,88 @@ const pillar2 = new Pillar({
 	z: glassUnitSize * 12 + glassUnitSize / 2
 });
 
+// 기둥
+const bar1 = new Bar({name: 'bar', x: -1.6, y: 10.3, z: 0});
+const bar2 = new Bar({name: 'bar', x: -0.4, y: 10.3, z: 0});
+const bar3 = new Bar({name: 'bar', x: 0.4, y: 10.3, z: 0});
+const bar4 = new Bar({name: 'bar', x: 1.6, y: 10.3, z: 0});
+
+// 사이드라이트
+for(let i = 0; i < 49; i++){
+	new SideLight({
+		name: 'sideLight', 
+		container: bar1.mesh, 
+		z: i * 0.5 - glassUnitSize * 10});
+}
+for(let i = 0; i < 49; i++){
+	new SideLight({
+		name: 'sideLight', 
+		container: bar4.mesh, 
+		z: i * 0.5 - glassUnitSize * 10});
+}
+
+// 유리판
+let glassTypeNumber = 0;
+let glassTypes = []
+for(let i = 0; i < numberOfGlass; i++){
+	glassTypeNumber = Math.round(Math.random());
+	switch(glassTypeNumber){
+		case 0:
+			glassTypes = ['normal', 'strong'];
+			break;
+		case 1:
+			glassTypes = ['strong', 'normal'];
+			break;
+	};
+	const class1 = new Glass({
+		name: `glass-${glassTypes[0]}`,
+		x: -1,
+		y: 10.5,
+		z: i * glassUnitSize * 2 - glassUnitSize * 9,
+		type: glassTypes[0]
+	});
+	const class2 = new Glass({
+		name: `glass-${glassTypes[1]}`,
+		x: 1,
+		y: 10.5,
+		z: i * glassUnitSize * 2 - glassUnitSize * 9,
+		type: glassTypes[1]
+	});
+}
+// 플레이어
+const player = new Player({
+	name: 'player',
+	x: 0,
+	y: 10.8,
+	z: 13,
+	rotationY: Math.PI
+});
+
+// raycaster
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+function checkIntersects(){
+	raycaster.setFromCamera(mouse, camera);
+
+	const intersects = raycaster.intersectObjects(cm1.scene.children);
+	for (const item of intersects){
+		checkClickedObject(item.object.name);
+		break;
+	}
+}
+function checkClickedObject(objectName){
+	if(objectName.indexOf('glass') >= 0){
+
+	};
+}
+
 // 그리기
 const clock = new THREE.Clock();
 
 function draw() {
 	const delta = clock.getDelta();
+
+	if(cm1.mixer) cm1.mixer.update(delta);
 
 	controls.update();
 
@@ -96,5 +181,10 @@ function setSize() {
 
 // 이벤트
 window.addEventListener('resize', setSize);
+canvas.addEventListener('click', e => {
+	mouse.x = e.clientX / canvas.clientWidth * 2 - 1;
+	mouse.y = -(e.clientY / canvas.clientHeight * 2 - 1);
+	checkIntersects();
+})
 
 draw();
