@@ -20,7 +20,9 @@ export class Glass extends Stuff {
             break;
     }
 
-    
+    this.width = this.geometry.parameters.width;
+    this.height = this.geometry.parameters.height;
+    this.depth = this.geometry.parameters.depth;
 
     this.mesh = new Mesh(this.geometry, this.material);
     this.mesh.position.set(this.x, this.y, this.z);
@@ -28,5 +30,7 @@ export class Glass extends Stuff {
     this.mesh.receiveShadow = true;
     this.mesh.name = this.name;
     cm1.scene.add(this.mesh);
+
+    this.setCannonBody();
   }
 }

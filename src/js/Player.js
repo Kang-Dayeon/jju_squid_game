@@ -1,4 +1,4 @@
-import { AnimationMixer, Mesh } from 'three';
+import { AnimationMixer, BoxGeometry, Mesh, MeshBasicMaterial } from 'three';
 import { cm1 } from './common';
 import { Stuff } from './Stuff';
 
@@ -6,6 +6,18 @@ export class Player extends Stuff {
   constructor(info) {
     // 부모클레스 불러오기
     super(info);
+
+    this.width = 0.5;
+    this.height = 0.5;
+    this.depth = 0.5;
+
+    this.mesh = new Mesh(
+        new BoxGeometry(this.width, this.height, this.depth),
+        new MeshBasicMaterial({transparent:true, opacity:0})
+    );
+    this.mesh.castShadow = true;
+    this.mesh.position.set(this.x, this.y, this.z);
+    cm1.scene.add(this.mesh);
 
     cm1.gltfLoader.load(
         './../models/jju.glb',
@@ -24,6 +36,8 @@ export class Player extends Stuff {
             this.actions[1].repetitions = 1;
 
             this.actions[0].play();
+
+            this.setCannonBody();
         }
     )
 
