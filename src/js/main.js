@@ -235,17 +235,39 @@ function checkClickedObject(mesh) {
 							player.cannonBody.position.y = 9;
 							const timerId3 = setTimeout(() => {
 								onReplay = false;
+								const timerId4 = setTimeout(() => {
+									let replayBtn = document.querySelector('#fail-replay');
+									let modal = document.getElementById('fail');
+									modal.classList.remove('slide-up');
+									modal.classList.add('slide-down');
+									replayBtn.addEventListener('click', function () {
+										modal.classList.add('slide-up');
+										setTimeout(() => {
+											modal.classList.remove('slide-down');
+											window.location.reload();
+										}, 500);
+									});
+									modal.addEventListener('click', function (e) {
+										if (e.target == e.currentTarget) {
+											modal.classList.add('slide-up');
+											setTimeout(() => {
+												modal.classList.remove('slide-down');
+											}, 500);
+										};
+									});
+									clearTimeout(timerId4);
+								}, 1000)
 								clearTimeout(timerId3);
-							}, 3000)
+							}, 3000);
 							clearTimeout(timerId2);
-						}, 2000)
+						}, 2000);
 						clearTimeout(timerId);
-					}, 700)
+					}, 700);
 					break;
 				case 'strong':
 					console.log('strong');
 					break;
-			}
+			};
 
 			const timerId = setTimeout(() => {
 				jumping = false;
@@ -277,19 +299,41 @@ function checkClickedObject(mesh) {
 							x: 0,
 							z: -14,
 						}
-					)
+					);
 					gsap.to(player.cannonBody.position,
 						{
 							duration: 0.4,
 							y: 12,
 						}
-					)
+					);
+					const timerId2 = setTimeout(() => {
+						let replayBtn = document.querySelector('#success-replay');
+						let modal = document.getElementById('success');
+						modal.classList.remove('slide-up');
+						modal.classList.add('slide-down');
+						replayBtn.addEventListener('click', function () {
+							modal.classList.add('slide-up');
+							setTimeout(() => {
+								modal.classList.remove('slide-down');
+								window.location.reload();
+							}, 500);
+						});
+						modal.addEventListener('click', function (e) {
+							if (e.target == e.currentTarget) {
+								modal.classList.add('slide-up');
+								setTimeout(() => {
+									modal.classList.remove('slide-down');
+								}, 500);
+							};
+						});
+						clearTimeout(timerId2);
+					}, 1000);
 					clearTimeout(timerId);
 				}, 1500);
-			}
-		}
+			};
+		};
 	};
-}
+};
 
 // 그리기
 const clock = new THREE.Clock();
@@ -307,7 +351,7 @@ function draw() {
 				if (item.modelMesh) {
 					item.modelMesh.position.copy(item.cannonBody.position);
 					if (fail) item.modelMesh.quaternion.copy(item.cannonBody.quaternion);
-				}
+				};
 				item.modelMesh.position.y += 0.1;
 			} else {
 				item.mesh.position.copy(item.cannonBody.position);
@@ -315,11 +359,10 @@ function draw() {
 				if (item.modelMesh) {
 					item.modelMesh.position.copy(item.cannonBody.position);
 					item.modelMesh.quaternion.copy(item.cannonBody.quaternion);
-				}
-			}
-
-		}
-	})
+				};
+			};
+		};
+	});
 
 	controls.update();
 
@@ -329,16 +372,16 @@ function draw() {
 		renderer.render(cm1.scene, camera2);
 		camera2.position.x = player.cannonBody.position.x;
 		camera2.position.z = player.cannonBody.position.z;
-	}
+	};
 	renderer.setAnimationLoop(draw);
-}
+};
 
 function setSize() {
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	renderer.render(cm1.scene, camera);
-}
+};
 
 // 이벤트
 const preventDragClick = new PreventDragClick(canvas);
@@ -348,6 +391,6 @@ canvas.addEventListener('click', e => {
 	mouse.x = e.clientX / canvas.clientWidth * 2 - 1;
 	mouse.y = -(e.clientY / canvas.clientHeight * 2 - 1);
 	checkIntersects();
-})
+});
 
 draw();

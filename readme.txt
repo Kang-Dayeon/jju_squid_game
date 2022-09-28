@@ -5,6 +5,9 @@ npm i -D @babel/cli @babel/core @babel/preset-env babel-loader clean-webpack-plu
 ----------
 npm i three
 ----------
+npm i cannon-es
+----------
+npm i gsap
 
 2. 개발용 서버 구동
 터미널에 아래 점선 사이의 내용을 붙여 넣고 엔터를 누르세요.
