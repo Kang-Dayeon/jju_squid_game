@@ -1,7 +1,7 @@
 # jju_squid_game <br/>
 ![스크린샷 2022-09-28 오후 4 15 37](https://user-images.githubusercontent.com/94333816/192713441-fd7d9f34-045d-4872-a375-fa5b7f2e9e92.png)
 <br/>
-<img src="https://user-images.githubusercontent.com/94333816/192713841-032c923d-ad35-475b-986f-1f5173df08d8.mov" />
+![화면 기록 2022-09-28 오후 4 13 38](https://user-images.githubusercontent.com/94333816/192714630-8185f88e-1630-4d60-ad12-bffbcd6d6768.gif)
 <br/>
 three.js 라이브러리를 활용하여 넷플릭스 드라마 오징어 게임에 나오는 사다리게임을 만들어보았습니다.<br/>
 캐릭터는 개인적으로 좋아하는 주호민 작가님의 캐릭터 디자인을 적용하여 플레이어를 만들었습니다.<br/>
