@@ -2,7 +2,8 @@ import { cm1, cm2 } from './common';
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { SpotLight } from 'three';
+import gsap from 'gsap';
+import { PreventDragClick } from './PreventDragClick';
 import { Pillar } from './Pillar';
 import { Floor } from './Floor';
 import { Bar } from './Bar';
@@ -32,10 +33,14 @@ const camera = new THREE.PerspectiveCamera(
 	0.1,
 	1000
 );
+const camera2 = camera.clone();
 camera.position.x = -4;
 camera.position.y = 19;
 camera.position.z = 14;
-cm1.scene.add(camera);
+
+camera2.position.y = 0;
+camera2.lookAt(0, 1, 0);
+cm1.scene.add(camera, camera2);
 
 // Light
 const ambientLight = new THREE.AmbientLight(cm2.lightColor, 0.8);
@@ -59,6 +64,8 @@ cm1.scene.add(spotLight1, spotLight2, spotLight3, spotLight4);
 // Controls
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
+controls.maxDistance = 50;
+controls.minDistance = 5;
 
 // 물리 엔진
 cm1.world.gravity.set(0, -10, 0);
@@ -119,31 +126,38 @@ const pillar2 = new Pillar({
 objects.push(pillar1, pillar2);
 
 // 다리
-const bar1 = new Bar({name: 'bar', x: -1.6, y: 10.3, z: 0});
-const bar2 = new Bar({name: 'bar', x: -0.4, y: 10.3, z: 0});
-const bar3 = new Bar({name: 'bar', x: 0.4, y: 10.3, z: 0});
-const bar4 = new Bar({name: 'bar', x: 1.6, y: 10.3, z: 0});
+const bar1 = new Bar({ name: 'bar', x: -1.6, y: 10.3, z: 0 });
+const bar2 = new Bar({ name: 'bar', x: -0.4, y: 10.3, z: 0 });
+const bar3 = new Bar({ name: 'bar', x: 0.4, y: 10.3, z: 0 });
+const bar4 = new Bar({ name: 'bar', x: 1.6, y: 10.3, z: 0 });
 
 // 사이드라이트
-for(let i = 0; i < 49; i++){
-	new SideLight({
-		name: 'sideLight', 
-		container: bar1.mesh, 
-		z: i * 0.5 - glassUnitSize * 10});
+const sideLights = [];
+for (let i = 0; i < 49; i++) {
+	sideLights.push(new SideLight({
+		name: 'sideLight',
+		container: bar1.mesh,
+		z: i * 0.5 - glassUnitSize * 10
+	}));
 }
-for(let i = 0; i < 49; i++){
-	new SideLight({
-		name: 'sideLight', 
-		container: bar4.mesh, 
-		z: i * 0.5 - glassUnitSize * 10});
+for (let i = 0; i < 49; i++) {
+	sideLights.push(new SideLight({
+		name: 'sideLight',
+		container: bar4.mesh,
+		z: i * 0.5 - glassUnitSize * 10
+	}));
 }
 
 // 유리판
 let glassTypeNumber = 0;
-let glassTypes = []
-for(let i = 0; i < numberOfGlass; i++){
+let glassTypes = [];
+const glassZ = [];
+for (let i = 0; i < numberOfGlass; i++) {
+	glassZ.push(-(i * glassUnitSize * 2 - glassUnitSize * 9))
+}
+for (let i = 0; i < numberOfGlass; i++) {
 	glassTypeNumber = Math.round(Math.random());
-	switch(glassTypeNumber){
+	switch (glassTypeNumber) {
 		case 0:
 			glassTypes = ['normal', 'strong'];
 			break;
@@ -152,18 +166,20 @@ for(let i = 0; i < numberOfGlass; i++){
 			break;
 	};
 	const glass1 = new Glass({
+		step: i + 1,
 		name: `glass-${glassTypes[0]}`,
 		x: -1,
 		y: 10.5,
-		z: i * glassUnitSize * 2 - glassUnitSize * 9,
+		z: glassZ[i],
 		type: glassTypes[0],
 		cannonMaterial: cm1.glassMaterial
 	});
 	const glass2 = new Glass({
+		step: i + 1,
 		name: `glass-${glassTypes[1]}`,
 		x: 1,
 		y: 10.5,
-		z: i * glassUnitSize * 2 - glassUnitSize * 9,
+		z: glassZ[i],
 		type: glassTypes[1],
 		cannonMaterial: cm1.glassMaterial
 	});
@@ -185,20 +201,139 @@ objects.push(player);
 // raycaster
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
-function checkIntersects(){
+function checkIntersects() {
 	raycaster.setFromCamera(mouse, camera);
 
 	const intersects = raycaster.intersectObjects(cm1.scene.children);
-	for (const item of intersects){
-		checkClickedObject(item.object.name);
+	for (const item of intersects) {
+		checkClickedObject(item.object);
 		break;
 	}
 }
-function checkClickedObject(objectName){
-	if(objectName.indexOf('glass') >= 0){
+let fail = false;
+let jumping = false;
+let onReplay = false;
+function checkClickedObject(mesh) {
+	if (mesh.name.indexOf('glass') >= 0) {
+		if (jumping || fail) return;
+		if (mesh.step - 1 === cm2.step) {
+			player.actions[1].stop();
+			player.actions[1].play();
+			jumping = true;
+			cm2.step++;
 
+			switch (mesh.type) {
+				case 'normal':
+					console.log('normal');
+					const timerId = setTimeout(() => {
+						fail = true;
+						sideLights.forEach(item => {
+							item.turnOff();
+						});
+						const timerId2 = setTimeout(() => {
+							onReplay = true;
+							player.cannonBody.position.y = 9;
+							const timerId3 = setTimeout(() => {
+								onReplay = false;
+								const timerId4 = setTimeout(() => {
+									let replayBtn = document.querySelector('#fail-replay');
+									let modal = document.getElementById('fail');
+									modal.classList.remove('slide-up');
+									modal.classList.add('slide-down');
+									replayBtn.addEventListener('click', function () {
+										modal.classList.add('slide-up');
+										setTimeout(() => {
+											modal.classList.remove('slide-down');
+											window.location.reload();
+										}, 500);
+									});
+									modal.addEventListener('click', function (e) {
+										if (e.target == e.currentTarget) {
+											modal.classList.add('slide-up');
+											setTimeout(() => {
+												modal.classList.remove('slide-down');
+											}, 500);
+										};
+									});
+									clearTimeout(timerId4);
+								}, 1000)
+								clearTimeout(timerId3);
+							}, 3000);
+							clearTimeout(timerId2);
+						}, 2000);
+						clearTimeout(timerId);
+					}, 700);
+					break;
+				case 'strong':
+					console.log('strong');
+					break;
+			};
+
+			const timerId = setTimeout(() => {
+				jumping = false;
+				clearTimeout(timerId);
+			}, 1000)
+
+			gsap.to(player.cannonBody.position,
+				{
+					duration: 1,
+					x: mesh.position.x,
+					z: glassZ[cm2.step - 1],
+				}
+			)
+			gsap.to(player.cannonBody.position,
+				{
+					duration: 0.4,
+					y: 12,
+				}
+			);
+
+			// 클리어
+			if (cm2.step === numberOfGlass && mesh.type === 'strong') {
+				const timerId = setTimeout(() => {
+					player.actions[1].stop();
+					player.actions[1].play();
+					gsap.to(player.cannonBody.position,
+						{
+							duration: 1,
+							x: 0,
+							z: -14,
+						}
+					);
+					gsap.to(player.cannonBody.position,
+						{
+							duration: 0.4,
+							y: 12,
+						}
+					);
+					const timerId2 = setTimeout(() => {
+						let replayBtn = document.querySelector('#success-replay');
+						let modal = document.getElementById('success');
+						modal.classList.remove('slide-up');
+						modal.classList.add('slide-down');
+						replayBtn.addEventListener('click', function () {
+							modal.classList.add('slide-up');
+							setTimeout(() => {
+								modal.classList.remove('slide-down');
+								window.location.reload();
+							}, 500);
+						});
+						modal.addEventListener('click', function (e) {
+							if (e.target == e.currentTarget) {
+								modal.classList.add('slide-up');
+								setTimeout(() => {
+									modal.classList.remove('slide-down');
+								}, 500);
+							};
+						});
+						clearTimeout(timerId2);
+					}, 1000);
+					clearTimeout(timerId);
+				}, 1500);
+			};
+		};
 	};
-}
+};
 
 // 그리기
 const clock = new THREE.Clock();
@@ -206,43 +341,56 @@ const clock = new THREE.Clock();
 function draw() {
 	const delta = clock.getDelta();
 
-	if(cm1.mixer) cm1.mixer.update(delta);
+	if (cm1.mixer) cm1.mixer.update(delta);
 
-	cm1.world.step(1/60, delta, 3);
+	cm1.world.step(1 / 60, delta, 3);
 	objects.forEach(item => {
-		if(item.cannonBody){
-			item.mesh.position.copy(item.cannonBody.position);
-			item.mesh.quaternion.copy(item.cannonBody.quaternion);
-			if(item.modelMesh){
-				item.modelMesh.position.copy(item.cannonBody.position);
-				item.modelMesh.quaternion.copy(item.cannonBody.quaternion);
+		if (item.cannonBody) {
+			if (item.name === 'player') {
 
-				if(item.name === 'player'){
-					item.modelMesh.position.y += 0.1;
-				}
-			}
-		}
-	})
+				if (item.modelMesh) {
+					item.modelMesh.position.copy(item.cannonBody.position);
+					if (fail) item.modelMesh.quaternion.copy(item.cannonBody.quaternion);
+				};
+				item.modelMesh.position.y += 0.1;
+			} else {
+				item.mesh.position.copy(item.cannonBody.position);
+				item.mesh.quaternion.copy(item.cannonBody.quaternion);
+				if (item.modelMesh) {
+					item.modelMesh.position.copy(item.cannonBody.position);
+					item.modelMesh.quaternion.copy(item.cannonBody.quaternion);
+				};
+			};
+		};
+	});
 
 	controls.update();
 
-	renderer.render(cm1.scene, camera);
+	if (!onReplay) {
+		renderer.render(cm1.scene, camera);
+	} else {
+		renderer.render(cm1.scene, camera2);
+		camera2.position.x = player.cannonBody.position.x;
+		camera2.position.z = player.cannonBody.position.z;
+	};
 	renderer.setAnimationLoop(draw);
-}
+};
 
 function setSize() {
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	renderer.render(cm1.scene, camera);
-}
+};
 
 // 이벤트
+const preventDragClick = new PreventDragClick(canvas);
 window.addEventListener('resize', setSize);
 canvas.addEventListener('click', e => {
+	if (preventDragClick.mouseMoved) return;
 	mouse.x = e.clientX / canvas.clientWidth * 2 - 1;
 	mouse.y = -(e.clientY / canvas.clientHeight * 2 - 1);
 	checkIntersects();
-})
+});
 
 draw();
