@@ -1,3 +1,8 @@
+*{
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
 body {
 	margin: 0;
 }
@@ -5,4 +10,83 @@ body {
 	position: absolute;
 	left: 0;
 	top: 0;
+}
+p{
+	font-size: 14px;
+	line-height: 1.5;
+	color: #fff;
+}
+.playExplanation{
+	position: absolute;
+	bottom: 50px;
+	left: 30px;
+	padding: 15px;
+	border: 2px solid #fff;
+}
+.title{
+	text-align: center;
+	font-weight: bold;
+	font-size: 20px;
+}
+.sub-title{
+	margin-top: 10px;
+	font-size: 16px;
+}
+.sub-title:first-child{
+	margin-top: 0;
+}
+.black-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  padding: 100px 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+  transition: transform 0.5s ease-in;
+  transform: translateY(-1200px);
+  opacity: 0;
+}
+
+.slide-down {
+  transform: translateY(0px);
+  opacity: 1;
+}
+.slide-up {
+  transform: translateY(-1200px);
+}
+
+.white-bg {
+  position: absolute;
+	top: 50%;
+	left: 50%;
+	margin: -80px 0 0 -250px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+  width: 500px;
+  height: auto;
+  min-height: 150px;
+  border-radius: 20px;
+  background-color: #fff;
+}
+.white-bg h1 {
+  font-size: 24px;
+	font-weight: normal;
+}
+.white-bg .replay-btn {
+  margin-top: 20px;
+	padding: 8px 15px;
+	border: none;
+	border-radius: 5px;
+	background-color: black;
+	cursor: pointer;
+	color: #fff;
+}
+.white-bg .replay-btn:hover{
+	background-color: #071d28;
 }
