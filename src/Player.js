@@ -20,7 +20,7 @@ export class Player extends Stuff {
     cm1.scene.add(this.mesh);
 
     cm1.gltfLoader.load(
-        './../models/jju.glb',
+        './models/jju.glb',
         glb => {
             this.modelMesh = glb.scene.children[0];
             this.modelMesh.position.set(this.x, this.y, this.z);
