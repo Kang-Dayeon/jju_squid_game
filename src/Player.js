@@ -13,7 +13,7 @@ export class Player extends Stuff {
 
 
     cm1.gltfLoader.load(
-      './../models/jju.glb',
+      './models/jju.glb',
       glb => {
         // shadow
         glb.scene.traverse(child => {
