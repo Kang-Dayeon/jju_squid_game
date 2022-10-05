@@ -90,3 +90,23 @@ p{
 .white-bg .replay-btn:hover{
 	background-color: #071d28;
 }
+
+@media screen and (max-width:800px) {
+	p{
+		font-size: 12px;
+		line-height: 1.2;
+	}
+	.playExplanation{
+		bottom: 10px;
+		left: 10px;
+		padding: 10px;
+		width: 200px;
+	}
+	.title{
+		font-size: 16px;
+	}
+	.sub-title{
+		margin-top: 7px;
+		font-size: 14px;
+	}
+}
